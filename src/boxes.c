@@ -691,8 +691,8 @@ fmp4_box_traf(fmp4_mux* mux, fmp4_track* track, uint32_t id) {
                 WRITE_UINT32(1); /* group description index */
 
             }
+            BOX_END(BOX_sbgp);
         }
-        BOX_END(BOX_sbgp);
     }
     BOX_END(BOX_traf);
     return FMP4_OK;
