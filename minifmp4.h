@@ -201,6 +201,7 @@ struct fmp4_loudness {
     uint8_t system; /*measurement_system_for_TP */
     uint8_t reliability; /* reliaibility_for_TP */
     fmp4_membuf measurements;
+    fmp4_membuf alloc_measurement;
     const fmp4_allocator* allocator;
 };
 
@@ -263,6 +264,8 @@ struct fmp4_track {
     fmp4_membuf loudness;
     fmp4_membuf dsi;
 
+    fmp4_membuf alloc_loudness;
+
     uint32_t first_sample_flags;
 
     uint8_t  trun_sample_flags_set;
@@ -293,6 +296,10 @@ struct fmp4_mux {
     fmp4_membuf brands;
     fmp4_membuf tracks;
     fmp4_membuf emsgs;
+
+    fmp4_membuf alloc_track;
+    fmp4_membuf alloc_emsg;
+
     size_t moof_offset;
     uint32_t fragments;
     const fmp4_allocator* allocator;
@@ -364,25 +371,28 @@ fmp4_emsg*
 fmp4_emsg_new(const fmp4_allocator* allocator);
 
 
-/* allocates and adds a new track to the muxer, you'll
- * need to free the track whenever you're done with it */
+/* allocates and adds a new track to the muxer, it will
+ * automatically be freed whenever you close/free the muxer */
 FMP4_API
 fmp4_track*
 fmp4_mux_new_track(fmp4_mux* mux);
 
-/* allocates an emsg and adds it to the next media segment write,
- * you'll need to free the emsg whenever you're done with it. It's
- * safe to free it after a call to fmp4_mux_write_segment */
+/* allocates an emsg, does NOT add it to the next media
+ * segment write. It will automatically be freed whenever you
+ * close/free the muxer */
 FMP4_API
 fmp4_emsg*
 fmp4_mux_new_emsg(fmp4_mux* mux);
 
-/* adds an already-allocated track to the muxer, stores a reference to the track pointer */
+/* adds an already-allocated track to the muxer, stores a reference to the track pointer,
+ * you'll have to deallocate/free the track on your own */
 FMP4_API
 fmp4_result
 fmp4_mux_add_track(fmp4_mux* mux, const fmp4_track* track);
 
-/* adds an already-allocated emsg to the muxer for the next segment write */
+/* adds an emsg to the muxer for the next segment write - the
+ * emsg isn't serialized until you write the segment, so you can add the emsg
+ * and update fields, add data, etc up until you call fmp4_mux_write_segment */
 FMP4_API
 fmp4_result
 fmp4_mux_add_emsg(fmp4_mux* mux, const fmp4_emsg* emsg);
@@ -477,23 +487,25 @@ fmp4_result
 fmp4_emsg_validate(const fmp4_emsg* emsg);
 
 
+
 /* struct closure functions */
 
-/* frees all allocated data used by
- * the muxer, does not free any tracks, loudness_t,
- * etc added to the muxer */
+/* frees all allocated data used by the muxer - like buffer/scratch space,
+ * all tracks allocated via fmp4_mux_new_track,
+ * all emsgs allocated via fmp4_mux_new_emsg */
+
 FMP4_API
 void
 fmp4_mux_close(fmp4_mux* mux);
 
-/* frees all allocated data used by
- * the track, does not free any loudness_t,
- * etc added to the tracker */
+/* frees all allocated data used by the track - dsi and samples,
+ * and any loudness allocated via fmp4_track_new_loudness */
 FMP4_API
 void
 fmp4_track_close(fmp4_track* track);
 
-/* frees allocated data used by the loudness */
+/* frees allocated data used by the loudness, and any
+ * measurements allocated via fmp4_loudness_new_measurement */
 FMP4_API
 void
 fmp4_loudness_close(fmp4_loudness* loudness);
@@ -579,6 +591,18 @@ const char*
 fmp4_mux_get_brands(const fmp4_mux* mux, size_t* len);
 
 FMP4_API
+size_t
+fmp4_mux_get_track_count(const fmp4_mux* mux);
+
+FMP4_API
+fmp4_track*
+fmp4_mux_get_track(const fmp4_mux* mux, size_t index);
+
+FMP4_API
+fmp4_track**
+fmp4_mux_get_tracks(const fmp4_mux* mux, size_t* count);
+
+FMP4_API
 fmp4_stream_type
 fmp4_track_get_stream_type(const fmp4_track* track);
 
@@ -618,6 +642,30 @@ fmp4_track_get_roll_distance(const fmp4_track* track);
 FMP4_API
 fmp4_result
 fmp4_track_get_default_sample_info(const fmp4_track* track, fmp4_sample_info* info);
+
+FMP4_API
+size_t
+fmp4_track_get_loudness_count(const fmp4_track* track);
+
+FMP4_API
+fmp4_loudness*
+fmp4_track_get_loudness(const fmp4_track* track, size_t index);
+
+FMP4_API
+fmp4_loudness**
+fmp4_track_get_loudnesses(const fmp4_track* track, size_t* count);
+
+FMP4_API
+size_t
+fmp4_track_get_sample_info_count(const fmp4_track* track);
+
+FMP4_API
+fmp4_sample_info*
+fmp4_track_get_sample_info(const fmp4_track* track, size_t index);
+
+FMP4_API
+fmp4_sample_info**
+fmp4_track_get_sample_infos(const fmp4_track* track, size_t* count);
 
 FMP4_API
 const void*
@@ -682,6 +730,18 @@ fmp4_loudness_get_system(const fmp4_loudness* loudness);
 FMP4_API
 uint8_t
 fmp4_loudness_get_reliability(const fmp4_loudness* loudness);
+
+FMP4_API
+size_t
+fmp4_loudness_get_measurement_count(const fmp4_loudness* loudness);
+
+FMP4_API
+fmp4_measurement*
+fmp4_loudness_get_measurement(const fmp4_loudness* loudness, size_t index);
+
+FMP4_API
+fmp4_measurement**
+fmp4_loudness_get_measurements(const fmp4_loudness* loudness, size_t* count);
 
 FMP4_API
 uint8_t
@@ -2082,10 +2142,17 @@ fmp4_mux_new_track(fmp4_mux* mux) {
     fmp4_track* track = fmp4_track_new(mux->allocator);
     if(track == NULL) return track;
 
-    if(fmp4_mux_add_track(mux,track) != FMP4_OK) {
+    if(fmp4_membuf_cat(&mux->alloc_track,&track,sizeof(fmp4_track*)) != FMP4_OK) {
         fmp4_track_free(track);
-        track = NULL;
+        return NULL;
     }
+
+    if(fmp4_mux_add_track(mux,track) != FMP4_OK) {
+        fmp4_membuf_uncat(&mux->alloc_track, &track, sizeof(fmp4_track*));
+        fmp4_track_free(track);
+        return NULL;
+    }
+
     return track;
 }
 
@@ -2095,10 +2162,11 @@ fmp4_mux_new_emsg(fmp4_mux* mux) {
     fmp4_emsg* emsg = fmp4_emsg_new(mux->allocator);
     if(emsg == NULL) return emsg;
 
-    if(fmp4_mux_add_emsg(mux,emsg) != FMP4_OK) {
+    if(fmp4_membuf_cat(&mux->alloc_emsg,&emsg,sizeof(fmp4_emsg*)) != FMP4_OK) {
         fmp4_emsg_free(emsg);
-        emsg = NULL;
+        return NULL;
     }
+
     return emsg;
 }
 
@@ -2261,10 +2329,17 @@ fmp4_track_new_loudness(fmp4_track* track) {
     fmp4_loudness* loudness = fmp4_loudness_new(track->allocator);
     if(loudness == NULL) return loudness;
 
+    if(fmp4_membuf_cat(&track->alloc_loudness,&loudness,sizeof(fmp4_loudness*)) != FMP4_OK) {
+        fmp4_loudness_free(loudness);
+        return NULL;
+    }
+
     if(fmp4_track_add_loudness(track,loudness) != FMP4_OK) {
         fmp4_loudness_free(loudness);
-        loudness = NULL;
+        fmp4_membuf_uncat(&track->alloc_loudness, &loudness, sizeof(fmp4_loudness*));
+        return NULL;
     }
+
     return loudness;
 }
 
@@ -2392,10 +2467,17 @@ fmp4_loudness_new_measurement(fmp4_loudness* loudness) {
     fmp4_measurement* measurement = fmp4_measurement_new(loudness->allocator);
     if(measurement == NULL) return measurement;
 
+    if(fmp4_membuf_cat(&loudness->alloc_measurement,&measurement,sizeof(fmp4_measurement*)) != FMP4_OK) {
+        fmp4_measurement_free(measurement);
+        return NULL;
+    }
+
     if(fmp4_loudness_add_measurement(loudness,measurement) != FMP4_OK) {
         fmp4_measurement_free(measurement);
-        measurement = NULL;
+        fmp4_membuf_uncat(&loudness->alloc_measurement, &measurement, sizeof(fmp4_measurement*));
+        return NULL;
     }
+
     return measurement;
 }
 
@@ -2477,6 +2559,28 @@ fmp4_mux_get_brands(const fmp4_mux* mux, size_t* len) {
 }
 
 FMP4_API
+size_t
+fmp4_mux_get_track_count(const fmp4_mux* mux) {
+    return mux->tracks.len / sizeof(fmp4_track*);
+}
+
+FMP4_API
+fmp4_track**
+fmp4_mux_get_tracks(const fmp4_mux* mux, size_t* count) {
+    if(count != NULL) *count = mux->tracks.len / sizeof(fmp4_track*);
+    return (fmp4_track**)mux->tracks.x;
+}
+
+FMP4_API
+fmp4_track*
+fmp4_mux_get_track(const fmp4_mux* mux, size_t index) {
+    size_t len = mux->tracks.len / sizeof(fmp4_track*);
+    fmp4_track** tracks = (fmp4_track**)mux->tracks.x;
+    if(index < len) return tracks[index];
+    return NULL;
+}
+
+FMP4_API
 fmp4_stream_type
 fmp4_track_get_stream_type(const fmp4_track* track) {
     return track->stream_type;
@@ -2538,6 +2642,49 @@ fmp4_track_get_default_sample_info(const fmp4_track *track, fmp4_sample_info* in
     return FMP4_OK;
 }
 
+FMP4_API
+size_t
+fmp4_track_get_loudness_count(const fmp4_track* track) {
+    return track->loudness.len / sizeof(fmp4_loudness*);
+}
+
+FMP4_API
+fmp4_loudness*
+fmp4_track_get_loudness(const fmp4_track* track, size_t index) {
+    size_t count = track->loudness.len / sizeof(fmp4_loudness*);
+    fmp4_loudness** loudnesses = (fmp4_loudness**)track->loudness.x;
+    if(index < count) return loudnesses[index];
+    return NULL;
+}
+
+FMP4_API
+fmp4_loudness**
+fmp4_track_get_loudnesses(const fmp4_track* track, size_t* count) {
+    if(count != NULL) *count = track->loudness.len / sizeof(fmp4_loudness*);
+    return (fmp4_loudness**)track->loudness.x;
+}
+
+FMP4_API
+size_t
+fmp4_track_get_sample_info_count(const fmp4_track* track) {
+    return track->sample_info.len / sizeof(fmp4_sample_info*);
+}
+
+FMP4_API
+fmp4_sample_info*
+fmp4_track_get_sample_info(const fmp4_track* track, size_t index) {
+    size_t count = track->sample_info.len / sizeof(fmp4_sample_info*);
+    fmp4_sample_info** sample_infoes = (fmp4_sample_info**)track->sample_info.x;
+    if(index < count) return sample_infoes[index];
+    return NULL;
+}
+
+FMP4_API
+fmp4_sample_info**
+fmp4_track_get_sample_infos(const fmp4_track* track, size_t* count) {
+    if(count != NULL) *count = track->sample_info.len / sizeof(fmp4_sample_info*);
+    return (fmp4_sample_info**)track->sample_info.x;
+}
 
 FMP4_API
 const void*
@@ -2638,6 +2785,28 @@ FMP4_API
 uint8_t
 fmp4_loudness_get_reliability(const fmp4_loudness* loudness) {
     return loudness->reliability;
+}
+
+FMP4_API
+size_t
+fmp4_loudness_get_measurement_count(const fmp4_loudness* loudness) {
+    return loudness->measurements.len / sizeof(fmp4_measurement*);
+}
+
+FMP4_API
+fmp4_measurement*
+fmp4_loudness_get_measurement(const fmp4_loudness* loudness, size_t index) {
+    size_t count = loudness->measurements.len / sizeof(fmp4_measurement*);
+    fmp4_measurement** measurements = (fmp4_measurement**)loudness->measurements.x;
+    if(index < count) return measurements[index];
+    return NULL;
+}
+
+FMP4_API
+fmp4_measurement**
+fmp4_loudness_get_measurements(const fmp4_loudness* loudness, size_t* count) {
+    if(count != NULL) *count = loudness->measurements.len / sizeof(fmp4_measurement*);
+    return (fmp4_measurement**)loudness->measurements.x;
 }
 
 FMP4_API
@@ -3222,6 +3391,8 @@ fmp4_mux_init(fmp4_mux* mux, const fmp4_allocator* allocator) {
     fmp4_membuf_init(&mux->brands, mux->allocator);
     fmp4_membuf_init(&mux->tracks, mux->allocator);
     fmp4_membuf_init(&mux->emsgs,  mux->allocator);
+    fmp4_membuf_init(&mux->alloc_track, mux->allocator);
+    fmp4_membuf_init(&mux->alloc_emsg,  mux->allocator);
     mux->brand_minor_version = 0;
     mux->fragments = 0;
     mux->moof_offset = 0;
@@ -3289,6 +3460,7 @@ fmp4_track_init(fmp4_track *track, const fmp4_allocator* allocator) {
     fmp4_membuf_init(&track->mdat,        track->allocator);
     fmp4_membuf_init(&track->dsi,         track->allocator);
     fmp4_membuf_init(&track->loudness,    track->allocator);
+    fmp4_membuf_init(&track->alloc_loudness, track->allocator);
     return;
 }
 
@@ -3307,6 +3479,7 @@ fmp4_loudness_init(fmp4_loudness* loudness, const fmp4_allocator* allocator) {
     loudness->reliability = 0;
 
     fmp4_membuf_init(&loudness->measurements, loudness->allocator);
+    fmp4_membuf_init(&loudness->alloc_measurement, loudness->allocator);
     return;
 }
 
@@ -3414,28 +3587,75 @@ fmp4_emsg_new(const fmp4_allocator* allocator) {
 FMP4_API
 void
 fmp4_mux_close(fmp4_mux* mux) {
+    size_t i;
+    size_t len;
+
+    fmp4_track** tracks;
+    fmp4_emsg** emsgs;
+
     fmp4_membuf_free(&mux->tracks);
     fmp4_membuf_free(&mux->buffer);
     fmp4_membuf_free(&mux->stack);
     fmp4_membuf_free(&mux->brands);
     fmp4_membuf_free(&mux->emsgs);
+
+    tracks = (fmp4_track**)mux->alloc_track.x;
+    len = mux->alloc_track.len / sizeof(fmp4_track*);
+    for(i=0;i<len;i++) {
+        fmp4_track_free(tracks[i]);
+    }
+
+    emsgs = (fmp4_emsg**)mux->alloc_emsg.x;
+    len = mux->alloc_emsg.len / sizeof(fmp4_emsg*);
+    for(i=0;i<len;i++) {
+        fmp4_emsg_free(emsgs[i]);
+    }
+
+    fmp4_membuf_free(&mux->alloc_track);
+    fmp4_membuf_free(&mux->alloc_emsg);
+
     return;
 }
 
 FMP4_API
 void
 fmp4_track_close(fmp4_track *track) {
+    size_t i;
+    size_t len;
+
+    fmp4_loudness** loudnesses;
+
     fmp4_membuf_free(&track->sample_info);
     fmp4_membuf_free(&track->mdat);
     fmp4_membuf_free(&track->loudness);
     fmp4_membuf_free(&track->dsi);
+
+    loudnesses = (fmp4_loudness**)track->alloc_loudness.x;
+    len = track->alloc_loudness.len / sizeof(fmp4_loudness*);
+    for(i=0;i<len;i++) {
+        fmp4_loudness_free(loudnesses[i]);
+    }
+    fmp4_membuf_free(&track->alloc_loudness);
+
     return;
 }
 
 FMP4_API
 void
 fmp4_loudness_close(fmp4_loudness* loudness) {
+    size_t i;
+    size_t len;
+
+    fmp4_measurement** measurements;
+
     fmp4_membuf_free(&loudness->measurements);
+
+    measurements = (fmp4_measurement**)loudness->alloc_measurement.x;
+    len = loudness->alloc_measurement.len / sizeof(fmp4_measurement*);
+    for(i=0;i<len;i++) {
+        fmp4_measurement_free(measurements[i]);
+    }
+    fmp4_membuf_free(&loudness->alloc_measurement);
     return;
 }
 

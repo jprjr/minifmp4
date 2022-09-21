@@ -3,25 +3,28 @@
 #include "defines.h"
 #include "structs.h"
 
-/* allocates and adds a new track to the muxer, you'll
- * need to free the track whenever you're done with it */
+/* allocates and adds a new track to the muxer, it will
+ * automatically be freed whenever you close/free the muxer */
 FMP4_API
 fmp4_track*
 fmp4_mux_new_track(fmp4_mux* mux);
 
-/* allocates an emsg and adds it to the next media segment write,
- * you'll need to free the emsg whenever you're done with it. It's
- * safe to free it after a call to fmp4_mux_write_segment */
+/* allocates an emsg, does NOT add it to the next media
+ * segment write. It will automatically be freed whenever you
+ * close/free the muxer */
 FMP4_API
 fmp4_emsg*
 fmp4_mux_new_emsg(fmp4_mux* mux);
 
-/* adds an already-allocated track to the muxer, stores a reference to the track pointer */
+/* adds an already-allocated track to the muxer, stores a reference to the track pointer,
+ * you'll have to deallocate/free the track on your own */
 FMP4_API
 fmp4_result
 fmp4_mux_add_track(fmp4_mux* mux, const fmp4_track* track);
 
-/* adds an already-allocated emsg to the muxer for the next segment write */
+/* adds an emsg to the muxer for the next segment write - the
+ * emsg isn't serialized until you write the segment, so you can add the emsg
+ * and update fields, add data, etc up until you call fmp4_mux_write_segment */
 FMP4_API
 fmp4_result
 fmp4_mux_add_emsg(fmp4_mux* mux, const fmp4_emsg* emsg);

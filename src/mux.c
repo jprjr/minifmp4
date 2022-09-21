@@ -14,10 +14,17 @@ fmp4_mux_new_track(fmp4_mux* mux) {
     fmp4_track* track = fmp4_track_new(mux->allocator);
     if(track == NULL) return track;
 
-    if(fmp4_mux_add_track(mux,track) != FMP4_OK) {
+    if(fmp4_membuf_cat(&mux->alloc_track,&track,sizeof(fmp4_track*)) != FMP4_OK) {
         fmp4_track_free(track);
-        track = NULL;
+        return NULL;
     }
+
+    if(fmp4_mux_add_track(mux,track) != FMP4_OK) {
+        fmp4_membuf_uncat(&mux->alloc_track, &track, sizeof(fmp4_track*));
+        fmp4_track_free(track);
+        return NULL;
+    }
+
     return track;
 }
 
@@ -27,10 +34,11 @@ fmp4_mux_new_emsg(fmp4_mux* mux) {
     fmp4_emsg* emsg = fmp4_emsg_new(mux->allocator);
     if(emsg == NULL) return emsg;
 
-    if(fmp4_mux_add_emsg(mux,emsg) != FMP4_OK) {
+    if(fmp4_membuf_cat(&mux->alloc_emsg,&emsg,sizeof(fmp4_emsg*)) != FMP4_OK) {
         fmp4_emsg_free(emsg);
-        emsg = NULL;
+        return NULL;
     }
+
     return emsg;
 }
 

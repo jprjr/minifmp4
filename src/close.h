@@ -3,23 +3,25 @@
 
 #include "defines.h"
 #include "structs.h"
+
 /* struct closure functions */
 
-/* frees all allocated data used by
- * the muxer, does not free any tracks, loudness_t,
- * etc added to the muxer */
+/* frees all allocated data used by the muxer - like buffer/scratch space,
+ * all tracks allocated via fmp4_mux_new_track,
+ * all emsgs allocated via fmp4_mux_new_emsg */
+
 FMP4_API
 void
 fmp4_mux_close(fmp4_mux* mux);
 
-/* frees all allocated data used by
- * the track, does not free any loudness_t,
- * etc added to the tracker */
+/* frees all allocated data used by the track - dsi and samples,
+ * and any loudness allocated via fmp4_track_new_loudness */
 FMP4_API
 void
 fmp4_track_close(fmp4_track* track);
 
-/* frees allocated data used by the loudness */
+/* frees allocated data used by the loudness, and any
+ * measurements allocated via fmp4_loudness_new_measurement */
 FMP4_API
 void
 fmp4_loudness_close(fmp4_loudness* loudness);

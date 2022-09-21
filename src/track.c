@@ -12,10 +12,17 @@ fmp4_track_new_loudness(fmp4_track* track) {
     fmp4_loudness* loudness = fmp4_loudness_new(track->allocator);
     if(loudness == NULL) return loudness;
 
+    if(fmp4_membuf_cat(&track->alloc_loudness,&loudness,sizeof(fmp4_loudness*)) != FMP4_OK) {
+        fmp4_loudness_free(loudness);
+        return NULL;
+    }
+
     if(fmp4_track_add_loudness(track,loudness) != FMP4_OK) {
         fmp4_loudness_free(loudness);
-        loudness = NULL;
+        fmp4_membuf_uncat(&track->alloc_loudness, &loudness, sizeof(fmp4_loudness*));
+        return NULL;
     }
+
     return loudness;
 }
 

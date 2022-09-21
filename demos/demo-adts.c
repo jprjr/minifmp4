@@ -237,11 +237,6 @@ int main(int argc, const char* argv[]) {
     fprintf(hls_output,"#EXT-X-PLAYLIST-TYPE:VOD\n");
     fprintf(hls_output,"#EXT-X-MAP:URI=\"init.mp4\"\n");
 
-    snprintf(path,BUFFER_SIZE,"Segment %u",++segment_no);
-    id3_add_tag(&id3_data,"TIT2",path);
-    fmp4_emsg_set_message(emsg,id3_data.data,id3_data.len);
-    id3_reset(&id3_data);
-
     for(; ;) {
         if(header.frame_length > buffer_a) {
             buffer = realloc(buffer,buffer_a + BUFFER_SIZE);
@@ -257,8 +252,15 @@ int main(int argc, const char* argv[]) {
         packet_no++;
 
         if(packet_no == packets_per_seg) {
+            snprintf(path,BUFFER_SIZE,"Segment %u",++segment_no);
+
+            id3_reset(&id3_data);
+            id3_add_tag(&id3_data,"TIT2",path);
+
+            fmp4_emsg_set_message(emsg,id3_data.data,id3_data.len);
             emsg->presentation_time = fmp4_track_get_base_media_decode_time(track);
             emsg->event_duration = fmp4_track_get_trun_sample_count(track);
+            fmp4_mux_add_emsg(mux,emsg);
 
             snprintf(path,BUFFER_SIZE,"%s/%08u.m4s",argv[2],segment_no);
             output = fopen(path,"wb");
@@ -271,18 +273,11 @@ int main(int argc, const char* argv[]) {
             fclose(output);
             output = NULL;
 
-            fmp4_mux_add_emsg(mux,emsg);
-
             fprintf(hls_output,"#EXTINF:%f,\n",((double)packet_no) * 1024.0f / ((double)freq));
             fprintf(hls_output,"%08u.m4s\n",segment_no);
 
-            snprintf(path,BUFFER_SIZE,"Segment %u",++segment_no);
-            id3_add_tag(&id3_data,"TIT2",path);
-            fmp4_emsg_set_message(emsg,id3_data.data,id3_data.len);
-            id3_reset(&id3_data);
-            emsg->id++;
-
             packet_no = 0;
+            emsg->id++;
         }
 
         if(adts_grab_header(input, &header) != 0) {
@@ -292,8 +287,15 @@ int main(int argc, const char* argv[]) {
     }
 
     if(packet_no > 0) {
+        snprintf(path,BUFFER_SIZE,"Segment %u",++segment_no);
+
+        id3_reset(&id3_data);
+        id3_add_tag(&id3_data,"TIT2",path);
+
+        fmp4_emsg_set_message(emsg,id3_data.data,id3_data.len);
         emsg->presentation_time = fmp4_track_get_base_media_decode_time(track);
-        emsg->event_duration = track->trun_sample_count;
+        emsg->event_duration = fmp4_track_get_trun_sample_count(track);
+        fmp4_mux_add_emsg(mux,emsg);
 
         snprintf(path,BUFFER_SIZE,"%s/%08u.m4s",argv[2],segment_no);
         fprintf(stderr,"opening %s\n",path);
@@ -322,10 +324,6 @@ int main(int argc, const char* argv[]) {
     if(path != NULL) free(path);
 
     if(mux != NULL) fmp4_mux_free(mux);
-    if(track != NULL) fmp4_track_free(track);
-    if(loudness != NULL) fmp4_loudness_free(loudness);
-    if(measurement != NULL) fmp4_measurement_free(measurement);
-    if(emsg != NULL) fmp4_emsg_free(emsg);
     id3_free(&id3_data);
 
     return ret;

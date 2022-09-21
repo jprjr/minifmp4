@@ -20,6 +20,18 @@ const char*
 fmp4_mux_get_brands(const fmp4_mux* mux, size_t* len);
 
 FMP4_API
+size_t
+fmp4_mux_get_track_count(const fmp4_mux* mux);
+
+FMP4_API
+fmp4_track*
+fmp4_mux_get_track(const fmp4_mux* mux, size_t index);
+
+FMP4_API
+fmp4_track**
+fmp4_mux_get_tracks(const fmp4_mux* mux, size_t* count);
+
+FMP4_API
 fmp4_stream_type
 fmp4_track_get_stream_type(const fmp4_track* track);
 
@@ -59,6 +71,30 @@ fmp4_track_get_roll_distance(const fmp4_track* track);
 FMP4_API
 fmp4_result
 fmp4_track_get_default_sample_info(const fmp4_track* track, fmp4_sample_info* info);
+
+FMP4_API
+size_t
+fmp4_track_get_loudness_count(const fmp4_track* track);
+
+FMP4_API
+fmp4_loudness*
+fmp4_track_get_loudness(const fmp4_track* track, size_t index);
+
+FMP4_API
+fmp4_loudness**
+fmp4_track_get_loudnesses(const fmp4_track* track, size_t* count);
+
+FMP4_API
+size_t
+fmp4_track_get_sample_info_count(const fmp4_track* track);
+
+FMP4_API
+fmp4_sample_info*
+fmp4_track_get_sample_info(const fmp4_track* track, size_t index);
+
+FMP4_API
+fmp4_sample_info**
+fmp4_track_get_sample_infos(const fmp4_track* track, size_t* count);
 
 FMP4_API
 const void*
@@ -123,6 +159,18 @@ fmp4_loudness_get_system(const fmp4_loudness* loudness);
 FMP4_API
 uint8_t
 fmp4_loudness_get_reliability(const fmp4_loudness* loudness);
+
+FMP4_API
+size_t
+fmp4_loudness_get_measurement_count(const fmp4_loudness* loudness);
+
+FMP4_API
+fmp4_measurement*
+fmp4_loudness_get_measurement(const fmp4_loudness* loudness, size_t index);
+
+FMP4_API
+fmp4_measurement**
+fmp4_loudness_get_measurements(const fmp4_loudness* loudness, size_t* count);
 
 FMP4_API
 uint8_t

@@ -15,6 +15,8 @@ fmp4_mux_init(fmp4_mux* mux, const fmp4_allocator* allocator) {
     fmp4_membuf_init(&mux->brands, mux->allocator);
     fmp4_membuf_init(&mux->tracks, mux->allocator);
     fmp4_membuf_init(&mux->emsgs,  mux->allocator);
+    fmp4_membuf_init(&mux->alloc_track, mux->allocator);
+    fmp4_membuf_init(&mux->alloc_emsg,  mux->allocator);
     mux->brand_minor_version = 0;
     mux->fragments = 0;
     mux->moof_offset = 0;
@@ -82,6 +84,7 @@ fmp4_track_init(fmp4_track *track, const fmp4_allocator* allocator) {
     fmp4_membuf_init(&track->mdat,        track->allocator);
     fmp4_membuf_init(&track->dsi,         track->allocator);
     fmp4_membuf_init(&track->loudness,    track->allocator);
+    fmp4_membuf_init(&track->alloc_loudness, track->allocator);
     return;
 }
 
@@ -100,6 +103,7 @@ fmp4_loudness_init(fmp4_loudness* loudness, const fmp4_allocator* allocator) {
     loudness->reliability = 0;
 
     fmp4_membuf_init(&loudness->measurements, loudness->allocator);
+    fmp4_membuf_init(&loudness->alloc_measurement, loudness->allocator);
     return;
 }
 

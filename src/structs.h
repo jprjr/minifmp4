@@ -79,6 +79,7 @@ struct fmp4_loudness {
     uint8_t system; /*measurement_system_for_TP */
     uint8_t reliability; /* reliaibility_for_TP */
     fmp4_membuf measurements;
+    fmp4_membuf alloc_measurement;
     const fmp4_allocator* allocator;
 };
 
@@ -141,6 +142,8 @@ struct fmp4_track {
     fmp4_membuf loudness;
     fmp4_membuf dsi;
 
+    fmp4_membuf alloc_loudness;
+
     uint32_t first_sample_flags;
 
     uint8_t  trun_sample_flags_set;
@@ -171,6 +174,10 @@ struct fmp4_mux {
     fmp4_membuf brands;
     fmp4_membuf tracks;
     fmp4_membuf emsgs;
+
+    fmp4_membuf alloc_track;
+    fmp4_membuf alloc_emsg;
+
     size_t moof_offset;
     uint32_t fragments;
     const fmp4_allocator* allocator;

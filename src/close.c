@@ -6,28 +6,75 @@
 FMP4_API
 void
 fmp4_mux_close(fmp4_mux* mux) {
+    size_t i;
+    size_t len;
+
+    fmp4_track** tracks;
+    fmp4_emsg** emsgs;
+
     fmp4_membuf_free(&mux->tracks);
     fmp4_membuf_free(&mux->buffer);
     fmp4_membuf_free(&mux->stack);
     fmp4_membuf_free(&mux->brands);
     fmp4_membuf_free(&mux->emsgs);
+
+    tracks = (fmp4_track**)mux->alloc_track.x;
+    len = mux->alloc_track.len / sizeof(fmp4_track*);
+    for(i=0;i<len;i++) {
+        fmp4_track_free(tracks[i]);
+    }
+
+    emsgs = (fmp4_emsg**)mux->alloc_emsg.x;
+    len = mux->alloc_emsg.len / sizeof(fmp4_emsg*);
+    for(i=0;i<len;i++) {
+        fmp4_emsg_free(emsgs[i]);
+    }
+
+    fmp4_membuf_free(&mux->alloc_track);
+    fmp4_membuf_free(&mux->alloc_emsg);
+
     return;
 }
 
 FMP4_API
 void
 fmp4_track_close(fmp4_track *track) {
+    size_t i;
+    size_t len;
+
+    fmp4_loudness** loudnesses;
+
     fmp4_membuf_free(&track->sample_info);
     fmp4_membuf_free(&track->mdat);
     fmp4_membuf_free(&track->loudness);
     fmp4_membuf_free(&track->dsi);
+
+    loudnesses = (fmp4_loudness**)track->alloc_loudness.x;
+    len = track->alloc_loudness.len / sizeof(fmp4_loudness*);
+    for(i=0;i<len;i++) {
+        fmp4_loudness_free(loudnesses[i]);
+    }
+    fmp4_membuf_free(&track->alloc_loudness);
+
     return;
 }
 
 FMP4_API
 void
 fmp4_loudness_close(fmp4_loudness* loudness) {
+    size_t i;
+    size_t len;
+
+    fmp4_measurement** measurements;
+
     fmp4_membuf_free(&loudness->measurements);
+
+    measurements = (fmp4_measurement**)loudness->alloc_measurement.x;
+    len = loudness->alloc_measurement.len / sizeof(fmp4_measurement*);
+    for(i=0;i<len;i++) {
+        fmp4_measurement_free(measurements[i]);
+    }
+    fmp4_membuf_free(&loudness->alloc_measurement);
     return;
 }
 

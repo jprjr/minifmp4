@@ -10,10 +10,17 @@ fmp4_loudness_new_measurement(fmp4_loudness* loudness) {
     fmp4_measurement* measurement = fmp4_measurement_new(loudness->allocator);
     if(measurement == NULL) return measurement;
 
+    if(fmp4_membuf_cat(&loudness->alloc_measurement,&measurement,sizeof(fmp4_measurement*)) != FMP4_OK) {
+        fmp4_measurement_free(measurement);
+        return NULL;
+    }
+
     if(fmp4_loudness_add_measurement(loudness,measurement) != FMP4_OK) {
         fmp4_measurement_free(measurement);
-        measurement = NULL;
+        fmp4_membuf_uncat(&loudness->alloc_measurement, &measurement, sizeof(fmp4_measurement*));
+        return NULL;
     }
+
     return measurement;
 }
 

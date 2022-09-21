@@ -142,7 +142,6 @@ int main(int argc, const char* argv[]) {
     if(input != NULL) fclose(input);
     if(output != NULL) fclose(output);
     if(mux != NULL) fmp4_mux_free(mux);
-    if(track != NULL) fmp4_track_free(track);
     if(frame_data != NULL) free(frame_data);
     return ret;
 }

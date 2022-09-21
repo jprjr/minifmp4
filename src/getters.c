@@ -26,6 +26,28 @@ fmp4_mux_get_brands(const fmp4_mux* mux, size_t* len) {
 }
 
 FMP4_API
+size_t
+fmp4_mux_get_track_count(const fmp4_mux* mux) {
+    return mux->tracks.len / sizeof(fmp4_track*);
+}
+
+FMP4_API
+fmp4_track**
+fmp4_mux_get_tracks(const fmp4_mux* mux, size_t* count) {
+    if(count != NULL) *count = mux->tracks.len / sizeof(fmp4_track*);
+    return (fmp4_track**)mux->tracks.x;
+}
+
+FMP4_API
+fmp4_track*
+fmp4_mux_get_track(const fmp4_mux* mux, size_t index) {
+    size_t len = mux->tracks.len / sizeof(fmp4_track*);
+    fmp4_track** tracks = (fmp4_track**)mux->tracks.x;
+    if(index < len) return tracks[index];
+    return NULL;
+}
+
+FMP4_API
 fmp4_stream_type
 fmp4_track_get_stream_type(const fmp4_track* track) {
     return track->stream_type;
@@ -87,6 +109,49 @@ fmp4_track_get_default_sample_info(const fmp4_track *track, fmp4_sample_info* in
     return FMP4_OK;
 }
 
+FMP4_API
+size_t
+fmp4_track_get_loudness_count(const fmp4_track* track) {
+    return track->loudness.len / sizeof(fmp4_loudness*);
+}
+
+FMP4_API
+fmp4_loudness*
+fmp4_track_get_loudness(const fmp4_track* track, size_t index) {
+    size_t count = track->loudness.len / sizeof(fmp4_loudness*);
+    fmp4_loudness** loudnesses = (fmp4_loudness**)track->loudness.x;
+    if(index < count) return loudnesses[index];
+    return NULL;
+}
+
+FMP4_API
+fmp4_loudness**
+fmp4_track_get_loudnesses(const fmp4_track* track, size_t* count) {
+    if(count != NULL) *count = track->loudness.len / sizeof(fmp4_loudness*);
+    return (fmp4_loudness**)track->loudness.x;
+}
+
+FMP4_API
+size_t
+fmp4_track_get_sample_info_count(const fmp4_track* track) {
+    return track->sample_info.len / sizeof(fmp4_sample_info*);
+}
+
+FMP4_API
+fmp4_sample_info*
+fmp4_track_get_sample_info(const fmp4_track* track, size_t index) {
+    size_t count = track->sample_info.len / sizeof(fmp4_sample_info*);
+    fmp4_sample_info** sample_infoes = (fmp4_sample_info**)track->sample_info.x;
+    if(index < count) return sample_infoes[index];
+    return NULL;
+}
+
+FMP4_API
+fmp4_sample_info**
+fmp4_track_get_sample_infos(const fmp4_track* track, size_t* count) {
+    if(count != NULL) *count = track->sample_info.len / sizeof(fmp4_sample_info*);
+    return (fmp4_sample_info**)track->sample_info.x;
+}
 
 FMP4_API
 const void*
@@ -187,6 +252,28 @@ FMP4_API
 uint8_t
 fmp4_loudness_get_reliability(const fmp4_loudness* loudness) {
     return loudness->reliability;
+}
+
+FMP4_API
+size_t
+fmp4_loudness_get_measurement_count(const fmp4_loudness* loudness) {
+    return loudness->measurements.len / sizeof(fmp4_measurement*);
+}
+
+FMP4_API
+fmp4_measurement*
+fmp4_loudness_get_measurement(const fmp4_loudness* loudness, size_t index) {
+    size_t count = loudness->measurements.len / sizeof(fmp4_measurement*);
+    fmp4_measurement** measurements = (fmp4_measurement**)loudness->measurements.x;
+    if(index < count) return measurements[index];
+    return NULL;
+}
+
+FMP4_API
+fmp4_measurement**
+fmp4_loudness_get_measurements(const fmp4_loudness* loudness, size_t* count) {
+    if(count != NULL) *count = loudness->measurements.len / sizeof(fmp4_measurement*);
+    return (fmp4_measurement**)loudness->measurements.x;
 }
 
 FMP4_API
