@@ -2031,6 +2031,12 @@ fmp4_box_traf(fmp4_mux* mux, fmp4_track* track, uint32_t id) {
                 if(track->first_sample_flags != track->trun_sample_flags) {
                     trun_flags |= 0x04; /* first-sample-flags present */
                 }
+            } else {
+                /* we can inherit track sample flags, check if we need the first
+                 * sample flags */
+                if(track->first_sample_flags != default_flags) {
+                    trun_flags |= 0x04; /* first-sample-flags present */
+                }
             }
         } else {
             /* we had differing sample flags so just include all of them */
