@@ -346,7 +346,11 @@ fmp4_box_trak(fmp4_mux* mux, const fmp4_track* track, uint32_t id) {
                                 WRITE_UINT16(track->info.audio.channels);
                                 WRITE_UINT16(16);
                                 WRITE_UINT32(0);
-                                WRITE_UINT32((track->time_scale << 16));
+                                if(track->time_scale < 0x10000) {
+                                    WRITE_UINT32((track->time_scale << 16));
+                                } else {
+                                    WRITE_UINT32(0);
+                                }
 
                                 if(track->codec == FMP4_CODEC_MP4A) {
                                     BOX_BEGIN_FULL(BOX_esds, 0, 0);
