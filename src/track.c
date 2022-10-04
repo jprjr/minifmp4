@@ -112,6 +112,7 @@ fmp4_track_validate_init(const fmp4_track* track) {
                 case FMP4_CODEC_UNDEFINED: return FMP4_CODECINVALID;
                 case FMP4_CODEC_MP4A:
                     if(track->object_type == FMP4_OBJECT_TYPE_FORBIDDEN) return FMP4_OBJECTINVALID;
+                    if(track->object_type == FMP4_OBJECT_TYPE_MP3) break; /* MP3 does not have DSI */
                     /* fall-through */
                 case FMP4_CODEC_ALAC: /* fall-through */
                 case FMP4_CODEC_FLAC: /* fall-through */

@@ -368,11 +368,13 @@ fmp4_box_trak(fmp4_mux* mux, const fmp4_track* track, uint32_t id) {
                                                 WRITE_UINT32(0); /* maxbitrate */
                                                 WRITE_UINT32(0); /* average bitrate bps */
 
+                                                if(track->dsi.len > 0) {
                                                 ES_TAG_BEGIN(0x05);
                                                 {
                                                     WRITE_DATA(track->dsi.x, track->dsi.len);
                                                 }
                                                 ES_TAG_END(0x05);
+                                                }
                                             }
                                             ES_TAG_END(0x04);
 

@@ -39,13 +39,14 @@ typedef enum fmp4_stream_type fmp4_stream_type;
 enum fmp4_object_type {
     FMP4_OBJECT_TYPE_FORBIDDEN = 0x00,
     FMP4_OBJECT_TYPE_AAC = 0x40, /* covers AAC, HE-AAC, xHE-AAC, etc */
+    FMP4_OBJECT_TYPE_MP3 = 0x6B,
 };
 
 typedef enum fmp4_object_type fmp4_object_type;
 
 enum fmp4_codec {
     FMP4_CODEC_UNDEFINED = 0x00000000,
-    FMP4_CODEC_MP4A = 0x6d703461, /* covers AAC, HE-AAC, xHE-AAC, etc */
+    FMP4_CODEC_MP4A = 0x6d703461, /* covers AAC, HE-AAC, xHE-AAC, MP3-in-MP4, etc */
     FMP4_CODEC_ALAC = 0x616c6163,
     FMP4_CODEC_FLAC = 0x664c6143,
 };
