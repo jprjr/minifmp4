@@ -2234,10 +2234,10 @@ fmp4_mux_write_segment(fmp4_mux* mux, fmp4_write_cb write, void* userdata) {
     fmp4_emsg** emsgs;
     fmp4_track** tracks;
 
-    if( (res = fmp4_mux_validate_segment(mux)) != FMP4_OK) goto cleanup;
-
     tracks = (fmp4_track**)mux->tracks.x;
     emsgs = (fmp4_emsg**)mux->emsgs.x;
+
+    if( (res = fmp4_mux_validate_segment(mux)) != FMP4_OK) goto cleanup;
 
     if( (res = fmp4_box_styp(mux)) != FMP4_OK) goto cleanup;
 
