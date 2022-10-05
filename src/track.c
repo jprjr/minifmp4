@@ -116,6 +116,7 @@ fmp4_track_validate_init(const fmp4_track* track) {
                     /* fall-through */
                 case FMP4_CODEC_ALAC: /* fall-through */
                 case FMP4_CODEC_FLAC: /* fall-through */
+                case FMP4_CODEC_OPUS: /* fall-through */
                 default: {
                     if(track->dsi.len == 0) return FMP4_MISSINGDSI;
                     break;

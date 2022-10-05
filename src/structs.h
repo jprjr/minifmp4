@@ -49,6 +49,7 @@ enum fmp4_codec {
     FMP4_CODEC_MP4A = 0x6d703461, /* covers AAC, HE-AAC, xHE-AAC, MP3-in-MP4, etc */
     FMP4_CODEC_ALAC = 0x616c6163,
     FMP4_CODEC_FLAC = 0x664c6143,
+    FMP4_CODEC_OPUS = 0x4f707573,
 };
 
 typedef enum fmp4_codec fmp4_codec;

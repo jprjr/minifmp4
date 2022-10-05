@@ -49,6 +49,8 @@ enum fmp4_box_id {
     BOX_elst = BOX_ID('e','l','s','t'),
     BOX_sgpd = BOX_ID('s','g','p','d'),
     BOX_sbgp = BOX_ID('s','b','g','p'),
+    BOX_Opus = BOX_ID('O','p','u','s'),
+    BOX_dOps = BOX_ID('d','O','p','s'),
 };
 
 typedef enum fmp4_box_id fmp4_box_id;

@@ -395,6 +395,10 @@ fmp4_box_trak(fmp4_mux* mux, const fmp4_track* track, uint32_t id) {
                                     BOX_BEGIN_FULL(BOX_dfLa, 0, 0);
                                     WRITE_DATA(track->dsi.x, track->dsi.len);
                                     BOX_END(BOX_dfLa);
+                                } else if(track->codec == FMP4_CODEC_OPUS) {
+                                    BOX_BEGIN(BOX_dOps);
+                                    WRITE_DATA(track->dsi.x, track->dsi.len);
+                                    BOX_END(BOX_dOps);
                                 }
                             }
                         }
