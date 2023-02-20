@@ -399,6 +399,14 @@ fmp4_box_trak(fmp4_mux* mux, const fmp4_track* track, uint32_t id) {
                                     BOX_BEGIN(BOX_dOps);
                                     WRITE_DATA(track->dsi.x, track->dsi.len);
                                     BOX_END(BOX_dOps);
+                                } else if(track->codec == FMP4_CODEC_AC3) {
+                                    BOX_BEGIN(BOX_dac3);
+                                    WRITE_DATA(track->dsi.x, track->dsi.len);
+                                    BOX_END(BOX_dac3);
+                                } else if(track->codec == FMP4_CODEC_EAC3) {
+                                    BOX_BEGIN(BOX_dec3);
+                                    WRITE_DATA(track->dsi.x, track->dsi.len);
+                                    BOX_END(BOX_dec3);
                                 }
                             }
                         }

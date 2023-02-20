@@ -51,6 +51,10 @@ enum fmp4_box_id {
     BOX_sbgp = BOX_ID('s','b','g','p'),
     BOX_Opus = BOX_ID('O','p','u','s'),
     BOX_dOps = BOX_ID('d','O','p','s'),
+    BOX_ac_3 = BOX_ID('a','c','-','3'),
+    BOX_dac3 = BOX_ID('d','a','c','3'),
+    BOX_ec_3 = BOX_ID('e','c','-','3'),
+    BOX_dec3 = BOX_ID('d','e','c','3'),
 };
 
 typedef enum fmp4_box_id fmp4_box_id;

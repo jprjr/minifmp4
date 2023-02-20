@@ -50,6 +50,8 @@ enum fmp4_codec {
     FMP4_CODEC_ALAC = 0x616c6163,
     FMP4_CODEC_FLAC = 0x664c6143,
     FMP4_CODEC_OPUS = 0x4f707573,
+    FMP4_CODEC_AC3  = 0x61632d33,
+    FMP4_CODEC_EAC3 = 0x65632d33,
 };
 
 typedef enum fmp4_codec fmp4_codec;
