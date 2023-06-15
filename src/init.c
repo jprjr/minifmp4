@@ -61,6 +61,7 @@ fmp4_track_init(fmp4_track *track, const fmp4_allocator* allocator) {
     track->time_scale = 0;
     track->encoder_delay = 0;
     track->roll_distance = 0;
+    track->roll_type = FMP4_ROLL_TYPE_ROLL;
 
     fmp4_sample_info_init(&track->default_sample_info);
 

@@ -443,7 +443,11 @@ fmp4_box_trak(fmp4_mux* mux, const fmp4_track* track, uint32_t id) {
                     if(track->roll_distance != 0) {
                         BOX_BEGIN_FULL(BOX_sgpd, 1, 0);
                         {
-                            WRITE_UINT32( BOX_ID('r','o','l','l') ); /* grouping type */
+                            if(track->roll_type == FMP4_ROLL_TYPE_ROLL) {
+                                WRITE_UINT32( BOX_ID('r','o','l','l') ); /* grouping type roll */
+                            } else {
+                                WRITE_UINT32( BOX_ID('p','r','o','l') ); /* grouping type prol */
+                            }
                             WRITE_UINT32(2); /* default length */
                             WRITE_UINT32(1); /* entry count */
                             WRITE_INT16(track->roll_distance); /* roll distance */
@@ -709,7 +713,11 @@ fmp4_box_traf(fmp4_mux* mux, fmp4_track* track, uint32_t id) {
         if(track->roll_distance != 0) {
             BOX_BEGIN_FULL(BOX_sbgp, 0, 0);
             {
-                WRITE_UINT32(BOX_ID('r','o','l','l')); /* grouping type */
+                if(track->roll_type == FMP4_ROLL_TYPE_ROLL) {
+                    WRITE_UINT32( BOX_ID('r','o','l','l') ); /* grouping type roll */
+                } else {
+                    WRITE_UINT32( BOX_ID('p','r','o','l') ); /* grouping type prol */
+                }
                 WRITE_UINT32(1); /* entry count */
                 WRITE_UINT32(track->sample_info.len / sizeof(fmp4_sample_info)); /* sample count */
                 WRITE_UINT32(1); /* group description index */

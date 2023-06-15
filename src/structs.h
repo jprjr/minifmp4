@@ -36,6 +36,13 @@ enum fmp4_stream_type {
 
 typedef enum fmp4_stream_type fmp4_stream_type;
 
+enum fmp4_roll_type {
+    FMP4_ROLL_TYPE_ROLL,
+    FMP4_ROLL_TYPE_PROL,
+};
+
+typedef enum fmp4_roll_type fmp4_roll_type;
+
 enum fmp4_object_type {
     FMP4_OBJECT_TYPE_FORBIDDEN = 0x00,
     FMP4_OBJECT_TYPE_AAC = 0x40, /* covers AAC, HE-AAC, xHE-AAC, etc */
@@ -135,6 +142,7 @@ struct fmp4_track {
     uint8_t language[4];
     uint32_t encoder_delay;
     int16_t roll_distance;
+    fmp4_roll_type roll_type;
 
     union {
         struct {

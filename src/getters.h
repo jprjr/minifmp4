@@ -69,6 +69,10 @@ int16_t
 fmp4_track_get_roll_distance(const fmp4_track* track);
 
 FMP4_API
+fmp4_roll_type
+fmp4_track_get_roll_type(const fmp4_track* track);
+
+FMP4_API
 fmp4_result
 fmp4_track_get_default_sample_info(const fmp4_track* track, fmp4_sample_info* info);
 

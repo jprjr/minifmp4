@@ -44,6 +44,10 @@ fmp4_track_set_roll_distance(fmp4_track* track, int16_t distance);
 
 FMP4_API
 void
+fmp4_track_set_roll_type(fmp4_track* track, fmp4_roll_type roll_type);
+
+FMP4_API
+void
 fmp4_track_set_audio_channels(fmp4_track* track, uint16_t channels);
 
 FMP4_API
