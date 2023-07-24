@@ -310,6 +310,13 @@ fmp4_sample_info_set_size(fmp4_sample_info* info, uint32_t size) {
 
 FMP4_API
 void
+fmp4_sample_info_set_sample_group(fmp4_sample_info* info, uint32_t sample_group) {
+    info->sample_group = sample_group;
+    return;
+}
+
+FMP4_API
+void
 fmp4_sample_info_set_flags(fmp4_sample_info* info, const fmp4_sample_flags* flags) {
     memcpy(&info->flags,flags,sizeof(fmp4_sample_flags));
     return;

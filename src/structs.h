@@ -112,6 +112,7 @@ typedef struct fmp4_sample_flags fmp4_sample_flags;
 struct fmp4_sample_info {
     uint32_t duration;
     uint32_t size;
+    uint32_t sample_group; /* used when you've specified a roll distance */
     fmp4_sample_flags flags;
     const fmp4_allocator* allocator;
 };

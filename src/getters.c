@@ -383,6 +383,12 @@ fmp4_sample_info_get_size(const fmp4_sample_info* info) {
 }
 
 FMP4_API
+uint32_t
+fmp4_sample_info_get_sample_group(const fmp4_sample_info* info) {
+    return info->sample_group;
+}
+
+FMP4_API
 fmp4_result
 fmp4_sample_info_get_flags(const fmp4_sample_info* info, fmp4_sample_flags* flags) {
     memcpy(flags,&info->flags,sizeof(fmp4_sample_flags));

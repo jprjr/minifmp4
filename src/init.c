@@ -45,6 +45,7 @@ void
 fmp4_sample_info_init(fmp4_sample_info* sample_info) {
     sample_info->duration = 0;
     sample_info->size = 0;
+    sample_info->sample_group = 0;
     fmp4_sample_flags_init(&sample_info->flags);
     return;
 }

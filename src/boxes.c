@@ -713,15 +713,42 @@ fmp4_box_traf(fmp4_mux* mux, fmp4_track* track, uint32_t id) {
         if(track->roll_distance != 0) {
             BOX_BEGIN_FULL(BOX_sbgp, 0, 0);
             {
+                size_t i;
+                size_t len = track->sample_info.len / sizeof(fmp4_sample_info);
+                fmp4_sample_info* info = (fmp4_sample_info *)track->sample_info.x;
+                uint32_t last_sample_group = 0xffffffff; /* set to invalid value to trigger first entry */
+                size_t entrycount_pos = 0; /* position to write final number of entries */
+                size_t entrycount = 0;
+                size_t samplecount_pos = 0; /* position to write the sample count for the current entry */
+                size_t samplecount = 0;
+
                 if(track->roll_type == FMP4_ROLL_TYPE_ROLL) {
                     WRITE_UINT32( BOX_ID('r','o','l','l') ); /* grouping type roll */
                 } else {
                     WRITE_UINT32( BOX_ID('p','r','o','l') ); /* grouping type prol */
                 }
-                WRITE_UINT32(1); /* entry count */
-                WRITE_UINT32(track->sample_info.len / sizeof(fmp4_sample_info)); /* sample count */
-                WRITE_UINT32(1); /* group description index */
 
+                /* iterate through samples and get assigned into correct sample groups */
+                entrycount_pos = mux->buffer.len; /* entry count, will update later */
+                WRITE_UINT32(0); /* reserve space for the entry count */
+
+                for(i=0;i<len;i++) {
+                    if(info[i].sample_group != last_sample_group) {
+                        if(i > 0) fmp4_pack_uint32be(&mux->buffer.x[samplecount_pos],samplecount);
+
+                        ++entrycount;
+                        last_sample_group = info[i].sample_group;
+                        samplecount_pos = mux->buffer.len;
+                        samplecount = 1;
+                        WRITE_UINT32(0); /* reserve space for the samplecount */
+                        WRITE_UINT32(last_sample_group); /* group description index, 0 = sync sample, 1 = non-sync sample */
+                    } else {
+                        ++samplecount;
+                    }
+                }
+
+                fmp4_pack_uint32be(&mux->buffer.x[samplecount_pos],samplecount);
+                fmp4_pack_uint32be(&mux->buffer.x[entrycount_pos],entrycount);
             }
             BOX_END(BOX_sbgp);
         }
